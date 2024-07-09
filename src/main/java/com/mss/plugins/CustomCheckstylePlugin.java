@@ -38,8 +38,8 @@ public class CustomCheckstylePlugin extends AbstractMojo {
     @Component
     private BuildPluginManager pluginManager;
 
-    @Parameter(property = "checkstyle.configLocation", defaultValue = "src/main/resources/checkstyle-rules.xml")
     private String configLocation;
+    
 
     @Parameter(property = "checkstyle.failOnViolation", defaultValue = "true")
     private boolean failOnViolation;
@@ -49,11 +49,18 @@ public class CustomCheckstylePlugin extends AbstractMojo {
     public void execute() throws MojoExecutionException{
         
     	try {
-            
+        
+    		configLocation = getClass().getClassLoader().getResource("checkstyle-rules.xml").toString();
+    		
             Xpp3Dom configuration = configuration( element(name("configLocation"), configLocation), element(name("failOnViolation"), Boolean.toString(failOnViolation)));
             
             executeMojo(plugin(groupId("org.apache.maven.plugins"),artifactId("maven-checkstyle-plugin"),version("3.2.1")),goal("check"),configuration,
                 executionEnvironment(project,session,pluginManager));
+            
+            
+            executeMojo(plugin(groupId("org.apache.maven.plugins"),artifactId("maven-pmd-plugin"),version("3.16.0")),goal("check"),configuration,
+                    executionEnvironment(project,session,pluginManager));
+            
             
             File targetDir = new File(project.getBuild().getDirectory());
             
